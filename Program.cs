@@ -1,6 +1,18 @@
+using blockBackend.Services;
+using blockBackend.Services.Context;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddScoped<BlogService>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<PasswordService>();
+
+var connectionString = builder.Configuration.GetConnectionString("MyBlogString");
+
+// configurese entity framework core to use SQL server as the database provider for a datacontext in our project
+builder.Services.AddDbContext<DataContext>(Options => Options.UseSqlServer(connectionString));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
