@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "CNqESxmYmlCT1c7Ldi+AYJqTbv1XrhL8m1fQCFLkc+w=",
+  "Source": "blockBackend",
+  "BasePath": "_content/blockBackend",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

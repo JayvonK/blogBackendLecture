@@ -14,6 +14,15 @@ var connectionString = builder.Configuration.GetConnectionString("MyBlogString")
 // configurese entity framework core to use SQL server as the database provider for a datacontext in our project
 builder.Services.AddDbContext<DataContext>(Options => Options.UseSqlServer(connectionString));
 
+builder.Services.AddCors(options => options.AddPolicy("BlogPolicy", 
+builder => {
+    builder.WithOrigins("http://localhost:5035")
+    .AllowAnyHeader()
+    .AllowAnyMethod();
+}
+));
+
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -28,7 +37,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
+app.UseCors("BlogPolicy");
 
 app.UseAuthorization();
 
