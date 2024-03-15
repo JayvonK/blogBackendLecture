@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using blockBackend.Models;
 using blockBackend.Models.DTO;
@@ -18,7 +19,8 @@ namespace blockBackend.Services
             _context = context;
         }
 
-        public bool DoesUserExist(string Username){
+        public bool DoesUserExist(string Username)
+        {
             // check if username exist
             // if 1 matches then return the item
             // if no item matches, then return null
@@ -31,12 +33,77 @@ namespace blockBackend.Services
             bool result = false;
 
             // if user doesn't exist, add user
-            if(!DoesUserExist(UserToAdd.Username)){
+            if (!DoesUserExist(UserToAdd.Username))
+            {
                 UserModel newUser = new UserModel();
-                result = true;
+
+                var hashPassword = HashPassword(UserToAdd.Password);
+
+                newUser.ID = UserToAdd.ID;
+                newUser.Username = UserToAdd.Username;
+                newUser.Salt = hashPassword.Salt;
+                newUser.Hash = hashPassword.Hash;
+
+                // add newUser to the database
+                _context.Add(newUser);
+
+                // save into database, return of number of entries written into database
+                result = _context.SaveChanges() != 0;
             }
 
             return result;
         }
+
+
+        // HashedPassword = H( Salt + Password )
+
+        public PasswordDTO HashPassword(string password)
+        {
+
+            PasswordDTO newHashPassword = new PasswordDTO();
+
+            // create a bye array using 64 bytes of salt.
+            byte[] SaltByte = new byte[64];
+
+            // this is our randomizer
+            RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider();
+
+            // take our SaltByte and make sure it contains no zero's. Making it more secure.
+            provider.GetNonZeroBytes(SaltByte);
+
+            // converting our salt into a string
+            string salt = Convert.ToBase64String(SaltByte);
+
+            // encode our password with salt into our hash. 10000 times, where 10000 is a common starting point. iterate 10000 times until we get hash
+            Rfc2898DeriveBytes rfc2898DeriveBytes = new Rfc2898DeriveBytes(password, SaltByte, 10000);
+
+            // convert the resulting byte array as a string of 256 bytes (one or two characters equal a byte)
+            string hash = Convert.ToBase64String(rfc2898DeriveBytes.GetBytes(256));
+
+            // we can save our hash and salt into our password DTO
+            newHashPassword.Salt = salt;
+            newHashPassword.Hash = hash;
+
+            return newHashPassword;
+        }
+
+
+
+        // verify user's password
+        public bool VerifyUsersPassword(string? password, string? storedHash, string? storedSalt){
+
+            // encode our salt back into the original byte array
+
+            byte[] SaltBytes = Convert.FromBase64String(storedSalt);
+
+            // repeat process of taking password entered and hashing it again
+            Rfc2898DeriveBytes rfc2898DeriveBytes = new Rfc2898DeriveBytes(password, SaltBytes, 10000);
+
+            // RFC289 object, retrieve the 256 bytes of hash, convert those into a string, assign the result to the newhash
+            string newHash = Convert.ToBase64String(rfc2898DeriveBytes.GetBytes(256));
+
+            return newHash == storedHash;
+        }
+
     }
 }
