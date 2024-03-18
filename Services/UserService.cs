@@ -151,9 +151,9 @@ namespace blockBackend.Services
                 }
 
                 // Token:
-                    // asdasdlejwfoeiwj. = header
-                    // oisodcijosdijcodsj. Payload: contains claims such as expiration itme
-                    // ;slakf;sdlofk;slfk; = signature encrypts and combines header and payload using secret key
+                // asdasdlejwfoeiwj. = header
+                // oisodcijosdijcodsj. Payload: contains claims such as expiration itme
+                // ;slakf;sdlofk;slfk; = signature encrypts and combines header and payload using secret key
             }
 
             return Result;
@@ -181,7 +181,8 @@ namespace blockBackend.Services
 
             bool result = false;
 
-            if(foundUser != null){
+            if (foundUser != null)
+            {
                 // a user was found
 
                 foundUser.Username = username;
@@ -193,10 +194,30 @@ namespace blockBackend.Services
         }
 
 
-        public UserModel GetUserById(int id){
+        public UserModel GetUserById(int id)
+        {
             return _context.UserInfo.SingleOrDefault(user => user.ID == id);
         }
 
+
+        public bool DeleteUser(string userToDelete)
+        {
+            // we are only sending over the username
+            // if username found found, delete user
+
+            UserModel foundUser = GetUserByUsername(userToDelete);
+
+            bool result = false;
+
+            if(foundUser != null){
+                // user was found
+
+                _context.Remove<UserModel>(foundUser);
+                result = _context.SaveChanges() != 0;
+            }
+
+            return result;
+        }
 
 
     }
