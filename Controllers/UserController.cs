@@ -1,3 +1,4 @@
+using blockBackend.Models;
 using blockBackend.Models.DTO;
 using blockBackend.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,11 @@ namespace blockBackend.Controllers;
         }
         
         //Login Endpoint
+        [HttpPost]
+        [Route("Login")]
+        public IActionResult Login([FromBody] LoginDTO User){
+            return _data.Login(User);
+        }
 
         //Add User Endpoint
             //if user already exists
@@ -29,6 +35,18 @@ namespace blockBackend.Controllers;
             }
 
         //Update User Endpiont
+        [HttpPut]
+        [Route("UpdateUser")]
+
+        public bool UpdateUser(UserModel userToUpdate){
+            return _data.UpdateUser(userToUpdate);
+        }
+
+        [HttpPut]
+        [Route("UpdateUser/{id}/{username}")]
+        public bool UpdateUser(int id, string username){
+            return _data.UpdateUsername(id, username);
+        }
 
         //Delete User Endpoint
 

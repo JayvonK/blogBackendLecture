@@ -1,15 +1,20 @@
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using blockBackend.Models;
 using blockBackend.Models.DTO;
 using blockBackend.Services.Context;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace blockBackend.Services
 {
-    public class UserService
+    public class UserService : ControllerBase
     {
 
         private readonly DataContext _context;
@@ -90,7 +95,8 @@ namespace blockBackend.Services
 
 
         // verify user's password
-        public bool VerifyUsersPassword(string? password, string? storedHash, string? storedSalt){
+        public bool VerifyUsersPassword(string? password, string? storedHash, string? storedSalt)
+        {
 
             // encode our salt back into the original byte array
 
@@ -104,6 +110,94 @@ namespace blockBackend.Services
 
             return newHash == storedHash;
         }
+
+
+        public IActionResult Login(LoginDTO User)
+        {
+            IActionResult Result = Unauthorized();
+
+
+            // check if user exists
+            if (DoesUserExist(User.Username))
+            {
+                // if true, continue with authentication
+                // if true, store our user object
+
+                UserModel foundUser = GetUserByUsername(User.Username);
+
+                // check if our password is correct
+                if (VerifyUsersPassword(User.Password, foundUser.Hash, foundUser.Salt))
+                {
+                    // anyone with this code can access the login
+                    var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@345"));
+
+                    // sign in credentials
+                    var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+
+                    // generate new token and log user out after 30 mins
+                    var tokeOptions = new JwtSecurityToken(
+                        issuer: "http://localhost:5000",
+                        audience: "http://localhost:5000",
+                        claims: new List<Claim>(), // Claims can be added here if needed
+                        expires: DateTime.Now.AddMinutes(30), // Set token expiration time (e.g., 30 minutes)
+                        signingCredentials: signinCredentials // Set signing credentials
+                    );
+
+                    // Generate JWT token as a string
+                    var tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
+
+                    // return JWT token through http response with status code 200
+                    Result = Ok(new { Token = tokenString });
+                }
+
+                // Token:
+                    // asdasdlejwfoeiwj. = header
+                    // oisodcijosdijcodsj. Payload: contains claims such as expiration itme
+                    // ;slakf;sdlofk;slfk; = signature encrypts and combines header and payload using secret key
+            }
+
+            return Result;
+        }
+
+
+        public UserModel GetUserByUsername(string username)
+        {
+            return _context.UserInfo.SingleOrDefault(user => user.Username == username);
+        }
+
+        public bool UpdateUser(UserModel userToUpdate)
+        {
+            _context.Update<UserModel>(userToUpdate);
+            return _context.SaveChanges() != 0;
+        }
+
+
+        public bool UpdateUsername(int id, string username)
+        {
+            //sending over just the id and username
+            //we have to get te object to be updated
+
+            UserModel foundUser = GetUserById(id);
+
+            bool result = false;
+
+            if(foundUser != null){
+                // a user was found
+
+                foundUser.Username = username;
+                _context.Update<UserModel>(foundUser);
+                result = _context.SaveChanges() != 0;
+            }
+
+            return result;
+        }
+
+
+        public UserModel GetUserById(int id){
+            return _context.UserInfo.SingleOrDefault(user => user.ID == id);
+        }
+
+
 
     }
 }
