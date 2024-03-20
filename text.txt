@@ -79,7 +79,7 @@ Models / folder
 
 
         - DTOs / folder
-            - LoginDTO / file  (datatransferobject)
+            - LoginDTO / file  (datatransferobject, basically little snippets of the our whole models to make everything faster. Also good for data security because you don't want to be passing more info to the front end than you need)
                 - string Username
                 - string Password
             - CreateAccountDTO / file

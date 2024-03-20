@@ -11,7 +11,7 @@ using blockBackend.Services.Context;
 namespace blockBackend.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240314164454_init")]
+    [Migration("20240319181821_init")]
     partial class init
     {
         /// <inheritdoc />

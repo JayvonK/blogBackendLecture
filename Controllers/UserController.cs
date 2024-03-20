@@ -61,4 +61,10 @@ public class UserController : ControllerBase
         return _data.DeleteUser(userToDelete);
     }
 
+    [HttpGet]
+    [Route("GetUserByUsername/{username}")]
+    public UserIdDTO GetUserByUsername(string username){
+        return _data.GetUserIdDTOByUsername(username);
+    }
+
 }

@@ -112,6 +112,7 @@ namespace blockBackend.Services
         }
 
 
+        // returning a result of that action (the jwt)
         public IActionResult Login(LoginDTO User)
         {
             IActionResult Result = Unauthorized();
@@ -184,8 +185,8 @@ namespace blockBackend.Services
             if (foundUser != null)
             {
                 // a user was found
-
                 foundUser.Username = username;
+                // the <> tells us what data 
                 _context.Update<UserModel>(foundUser);
                 result = _context.SaveChanges() != 0;
             }
@@ -217,6 +218,20 @@ namespace blockBackend.Services
             }
 
             return result;
+        }
+
+
+        public UserIdDTO GetUserIdDTOByUsername(string username){
+            UserIdDTO UserInfo = new UserIdDTO();
+
+            //query through database to find the user
+            UserModel foundUser = _context.UserInfo.SingleOrDefault(user => user.Username == username);
+
+            UserInfo.UserId = foundUser.ID;
+
+            UserInfo.PublisherName = foundUser.Username;
+            
+            return UserInfo;
         }
 
 
