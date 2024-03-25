@@ -16,7 +16,7 @@ builder.Services.AddDbContext<DataContext>(Options => Options.UseSqlServer(conne
 
 builder.Services.AddCors(options => options.AddPolicy("BlogPolicy", 
 builder => {
-    builder.WithOrigins("http://localhost:3000")
+    builder.WithOrigins("http://localhost:5035", "http://localhost:5244")
     .AllowAnyHeader()
     .AllowAnyMethod();
 }
